@@ -5,7 +5,7 @@
 
   import "./app.css";
   import { Info } from 'lucide-svelte';
-  import { Button } from "$lib/components/ui/button/index.js";
+  import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
   import * as Accordion from "$lib/components/ui/accordion/index.js";
   import * as Card from "$lib/components/ui/card/index.js";
   import * as Select from "$lib/components/ui/select/index.js";
@@ -13,7 +13,10 @@
   import { Label } from "$lib/components/ui/label/index.js";
   import * as Tabs from "$lib/components/ui/tabs/index.js";
   import * as Table from "$lib/components/ui/table/index.js";
-
+  import * as Tooltip from "$lib/components/ui/tooltip/index.js";
+  import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
+  import { Toaster } from "$lib/components/ui/sonner/index.js"
+  import { toast } from "svelte-sonner";
 
 
   let currentPage = 'home';
@@ -72,6 +75,13 @@
     },
   ];
 
+  let savedItems = [
+    "https://open.spotify.com/embed/track/7MJgZqsnLjhGwcZpRuHyp0?utm_source=generator&theme=0",
+    "https://open.spotify.com/embed/track/0h9HqYMU1EGRZ8E3aQ2lJE?utm_source=generator&theme=0",
+    "https://open.spotify.com/embed/artist/7to1UlTpu40h7CpjRPkGqA?utm_source=generator&theme=0",
+    "https://open.spotify.com/embed/track/4lriIG2vNqwDWzOj2I9rtj?utm_source=generator&theme=0"
+  ];
+
 </script>
 
 <style>
@@ -87,6 +97,10 @@
   }
 
   #random {
+    background:linear-gradient(60deg, #1db954, #191414);
+  }
+
+  main {
     background:linear-gradient(60deg, #1db954, #191414);
   }
 
@@ -119,6 +133,7 @@
 </style>
 
 <main class="h-full w-full">
+  <Toaster />
 
   {#if currentPage == 'home'}
   <div id="main" class="h-full">
@@ -129,8 +144,9 @@
       </div>
       <p class="text-white text-xl pb-10">Discover new horizons of music</p>
       <div class="flex items-center justify-center gap-4">
-        <Button variant="hero" on:click={() => currentPage = 'song'}>Song</Button>
-        <Button variant="hero" on:click={() => currentPage = 'song'}>Artist</Button>
+        <p class="text-white text-lg ml-[-11.5%]">Discover a random: </p>
+        <Button variant="hero" class="w-28" on:click={() => currentPage = 'song'}>Song</Button>
+        <Button variant="hero" class="w-28" on:click={() => currentPage = 'song'}>Artist</Button>
       </div>
 
       <div class="flex justify-center text-white mt-8">
@@ -143,9 +159,17 @@
             </Accordion.Content>
           </Accordion.Item>
           <Accordion.Item value="item-2">
-            <Accordion.Trigger>Is there a limit?</Accordion.Trigger>
+            <Accordion.Trigger>How often can I see new selections?</Accordion.Trigger>
             <Accordion.Content>
-              None! You can roll as many songs or artists as you like.
+              Everyday there will be a new random song and artist of the day for you to view! But by customizing
+              your filters, you can potentially see multiple songs and artists per day.
+            </Accordion.Content>
+          </Accordion.Item>
+          <Accordion.Item value="item-3">
+            <Accordion.Trigger>What if I see something I like?</Accordion.Trigger>
+            <Accordion.Content>
+              If you don't have a Spotify account to immediately save it with, you can use the save button and access
+              it from the 'Saved' page so that you won't lose it even once a new day begins.
             </Accordion.Content>
           </Accordion.Item>
         </Accordion.Root>
@@ -155,10 +179,10 @@
     </div>
   </div>
     
-  {:else if currentPage == 'song' || currentPage == 'artist'}
-    <div id="random" class="h-max w-full">
+  {:else if currentPage == 'song' || currentPage == 'artist' || currentPage == 'saved'}
+    <div id="random" class="w-full">
       <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-      <div id="header" class="flex text-xl p-2 text-white">
+      <div id="header" class="flex text-xl p-2 text-white fixed w-full">
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div class="flex cursor-pointer" on:click={() => {currentPage = 'home'}}>
@@ -171,129 +195,196 @@
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <p class="ml-16 header-link" on:click={() => currentPage = 'artist'}>Artist</p>
         <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <p class="ml-16 header-link" on:click={() => currentPage = 'song'}>Saved</p>
+        <p class="ml-16 header-link" on:click={() => currentPage = 'saved'}>Saved</p>
       </div>
+      {#if currentPage == 'song' || currentPage == 'artist'}
+        <div class="flex justify-center text-white">
+          <Card.Root class="w-1/2 mt-20">
+            <Card.Header>
+              <Card.Title class="flex justify-between">
+                {#if currentPage == 'song'}
+                  Song of the Day
+                {:else}
+                  Artist of the Day
+                {/if}
+                <Button variant="secondary" class="w-20" on:click={() => {
+                  if(currentPage == 'song') {
+                    savedItems = [...savedItems, "https://open.spotify.com/embed/track/3lsd1CbDC5ejAOJhPn5dB9?utm_source=generator&theme=0"];
+                  } else {
+                    savedItems = [...savedItems, "https://open.spotify.com/embed/artist/6bDWAcdtVR3WHz2xtiIPUi?utm_source=generator&theme=0"]
+                  }
+                  toast.success("Added to your saved items.")
+                }}>Save</Button>
+              </Card.Title>
+            </Card.Header>
+            <Card.Content>
+              <div id="selection">
+                {#if currentPage == 'song'}
+                  <iframe title="Spotify embed of random selection" style="border-radius:12px" src="https://open.spotify.com/embed/track/3lsd1CbDC5ejAOJhPn5dB9?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                {:else}
+                  <iframe title="Spotify embed of random artist" style="border-radius:12px" src="https://open.spotify.com/embed/artist/6bDWAcdtVR3WHz2xtiIPUi?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                {/if}
+              </div>
+            </Card.Content>
+            <Card.Footer class="flex justify-between">
+            </Card.Footer>
+          </Card.Root>
 
-      <div class="flex justify-center text-white">
-        <Card.Root class="w-1/2 mt-10">
-          <Card.Header>
-            <Card.Title>
-              {#if currentPage == 'song'}
-                Song of the Day
-              {:else}
-                Artist of the Day
-              {/if}
-            </Card.Title>
-          </Card.Header>
-          <Card.Content>
-            <div id="selection">
-              {#if currentPage == 'song'}
-                <iframe title="Spotify embed of random selection" style="border-radius:12px" src="https://open.spotify.com/embed/track/3lsd1CbDC5ejAOJhPn5dB9?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-              {:else}
-                <iframe title="Spotify embed of random artist" style="border-radius:12px" src="https://open.spotify.com/embed/artist/6bDWAcdtVR3WHz2xtiIPUi?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-              {/if}
-            </div>
-          </Card.Content>
-          <Card.Footer class="flex justify-between">
-          </Card.Footer>
-        </Card.Root>
+        </div>
 
-      </div>
-
-      <div class="flex justify-center text-white mt-8">
-        <Tabs.Root value="popular" class="w-1/2 text-center">
-          <Tabs.List>
-            <Tabs.Trigger class="w-[120px]" value="popular">Popular <Info class="ml-2 h-4" /></Tabs.Trigger>
-            <Tabs.Trigger class="w-[120px]" value="trending">Trending <Info class="ml-2 h-4" /></Tabs.Trigger>
-            <Tabs.Trigger class="w-[120px]" value="indie">Indie <Info class="ml-2 h-4" /></Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Content value="popular">
-            
-            <div class="flex justify-center">
-              <Card.Root class="w-3/4">
-                <Card.Content>
-                  <Table.Root>
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.Head class="w-[100px]">#</Table.Head>
-                        <Table.Head>Song</Table.Head>
-                        <Table.Head>Artist</Table.Head>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {#each popularSongs as item, i}
-                        <Table.Row class="text-left">
-                          <Table.Cell class="font-medium">{i+1}</Table.Cell>
-                          <Table.Cell><div class="flex"><img src="{item.icon}" alt="song icon" class="size-8 mr-2 mt-[-5px]" />{item.name}</div></Table.Cell>
-                          <Table.Cell>{item.artist}</Table.Cell>
+        <div class="flex justify-center text-white mt-8">
+          <Tabs.Root value="popular" class="w-1/2 text-center">
+            <Tabs.List>
+              <Tabs.Trigger class="w-[120px]" value="popular">Popular 
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger class="h-2 w-2">
+                        <Info class="h-4 ml-1 mt-[-3px]" title="Most popular songs of the day" />
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>
+                      <p>Most popular songs of the day</p>
+                    </Tooltip.Content>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              </Tabs.Trigger>
+              <Tabs.Trigger class="w-[120px]" value="trending">Trending 
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger class="h-2 w-2">
+                        <Info class="h-4 ml-1 mt-[-3px]" title="Most trending songs of the day" />
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>
+                      <p>Most trending songs of the day</p>
+                    </Tooltip.Content>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              </Tabs.Trigger>
+              <Tabs.Trigger class="w-[120px]" value="indie">Indie
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger class="h-2 w-2">
+                        <Info class="h-4 ml-1 mt-[-3px]" title="Most popular indie songs of the day" />
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>
+                      <p>Indie songs are shown if the artist is below a certain threshold of <br> monthly listeners to not be considered "mainstream".</p>
+                    </Tooltip.Content>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              </Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value="popular">
+              
+              <div class="flex justify-center">
+                <Card.Root class="w-3/4">
+                  <Card.Content>
+                    <Table.Root>
+                      <Table.Header>
+                        <Table.Row>
+                          <Table.Head class="w-[100px]">#</Table.Head>
+                          <Table.Head>Song</Table.Head>
+                          <Table.Head>Artist</Table.Head>
                         </Table.Row>
-                      {/each}
-                        
-                    </Table.Body>
-                  </Table.Root>
-                </Card.Content>
-              </Card.Root>
-            </div>
+                      </Table.Header>
+                      <Table.Body>
+                        {#each popularSongs as item, i}
+                          <Table.Row class="text-left">
+                            <Table.Cell class="font-medium">{i+1}</Table.Cell>
+                            <Table.Cell><div class="flex"><img src="{item.icon}" alt="song icon" class="size-8 mr-2 mt-[-5px]" />{item.name}</div></Table.Cell>
+                            <Table.Cell>{item.artist}</Table.Cell>
+                          </Table.Row>
+                        {/each}
+                          
+                      </Table.Body>
+                    </Table.Root>
+                  </Card.Content>
+                </Card.Root>
+              </div>
 
-          </Tabs.Content>
-          <Tabs.Content value="trending">
+            </Tabs.Content>
+            <Tabs.Content value="trending">
 
-            <div class="flex justify-center">
-              <Card.Root class="w-3/4">
-                <Card.Content>
-                  <Table.Root>
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.Head class="w-[100px]">#</Table.Head>
-                        <Table.Head>Song</Table.Head>
-                        <Table.Head>Artist</Table.Head>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {#each trendingSongs as item, i}
-                        <Table.Row class="text-left">
-                          <Table.Cell class="font-medium">{i+1}</Table.Cell>
-                          <Table.Cell><div class="flex"><img src="{item.icon}" alt="song icon" class="size-8 mr-2 mt-[-5px]" />{item.name}</div></Table.Cell>
-                          <Table.Cell>{item.artist}</Table.Cell>
+              <div class="flex justify-center">
+                <Card.Root class="w-3/4">
+                  <Card.Content>
+                    <Table.Root>
+                      <Table.Header>
+                        <Table.Row>
+                          <Table.Head class="w-[100px]">#</Table.Head>
+                          <Table.Head>Song</Table.Head>
+                          <Table.Head>Artist</Table.Head>
                         </Table.Row>
-                      {/each}
-                    </Table.Body>
-                  </Table.Root>
-                </Card.Content>
-              </Card.Root>
-            </div>
+                      </Table.Header>
+                      <Table.Body>
+                        {#each trendingSongs as item, i}
+                          <Table.Row class="text-left">
+                            <Table.Cell class="font-medium">{i+1}</Table.Cell>
+                            <Table.Cell><div class="flex"><img src="{item.icon}" alt="song icon" class="size-8 mr-2 mt-[-5px]" />{item.name}</div></Table.Cell>
+                            <Table.Cell>{item.artist}</Table.Cell>
+                          </Table.Row>
+                        {/each}
+                      </Table.Body>
+                    </Table.Root>
+                  </Card.Content>
+                </Card.Root>
+              </div>
 
-          </Tabs.Content>
-          <Tabs.Content value="indie">
+            </Tabs.Content>
+            <Tabs.Content value="indie">
 
-            <div class="flex justify-center">
-              <Card.Root class="w-3/4">
-                <Card.Content>
-                  <Table.Root>
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.Head class="w-[100px]">#</Table.Head>
-                        <Table.Head>Song</Table.Head>
-                        <Table.Head>Artist</Table.Head>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {#each indieSongs as item, i}
-                        <Table.Row class="text-left">
-                          <Table.Cell class="font-medium">{i+1}</Table.Cell>
-                          <Table.Cell><div class="flex"><img src="{item.icon}" alt="song icon" class="size-8 mr-2 mt-[-5px]" />{item.name}</div></Table.Cell>
-                          <Table.Cell>{item.artist}</Table.Cell>
+              <div class="flex justify-center">
+                <Card.Root class="w-3/4">
+                  <Card.Content>
+                    <Table.Root>
+                      <Table.Header>
+                        <Table.Row>
+                          <Table.Head class="w-[100px]">#</Table.Head>
+                          <Table.Head>Song</Table.Head>
+                          <Table.Head>Artist</Table.Head>
                         </Table.Row>
-                      {/each}
-                    </Table.Body>
-                  </Table.Root>
-                </Card.Content>
-              </Card.Root>
-            </div>
-            
-          </Tabs.Content>
-        </Tabs.Root>
-      </div>
+                      </Table.Header>
+                      <Table.Body>
+                        {#each indieSongs as item, i}
+                          <Table.Row class="text-left">
+                            <Table.Cell class="font-medium">{i+1}</Table.Cell>
+                            <Table.Cell><div class="flex"><img src="{item.icon}" alt="song icon" class="size-8 mr-2 mt-[-5px]" />{item.name}</div></Table.Cell>
+                            <Table.Cell>{item.artist}</Table.Cell>
+                          </Table.Row>
+                        {/each}
+                      </Table.Body>
+                    </Table.Root>
+                  </Card.Content>
+                </Card.Root>
+              </div>
+              
+            </Tabs.Content>
+          </Tabs.Root>
+        </div>
+      {:else}
+        <div class="flex justify-center text-white">
+          <Card.Root class="w-1/2 mt-20">
+            <Card.Header>
+              <Card.Title>
+                Your Saved Songs and Artists
+              </Card.Title>
+            </Card.Header>
+            <Card.Content>
+
+              <ScrollArea class="h-[28rem] w-full">
+                {#each savedItems as item, i}
+                  <div id="selection" class="mb-4" >
+                    <iframe title="Spotify embed of random selection" style="border-radius:12px" src={item} width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                  </div>
+                {/each}
+              </ScrollArea>
+              
+            </Card.Content>
+            <Card.Footer class="flex justify-between">
+            </Card.Footer>
+          </Card.Root>
+
+        </div>
+      {/if}
+      
       
     </div>
   {/if}
