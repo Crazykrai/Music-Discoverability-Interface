@@ -16,7 +16,7 @@
 
 
 
-  let currentPage = 'song';
+  let currentPage = 'home';
 
   let popularSongs = [
     {
