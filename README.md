@@ -13,7 +13,8 @@ to give users a chance to discover something completely brand new.
 ---
 
 ## Design Work and Sketches
-insert sketch photos
+![alt text](<images/image (7).png>)
+Sketches for the home page and random selection page
 
 ### Research
 
