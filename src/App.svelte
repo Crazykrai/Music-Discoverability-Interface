@@ -17,9 +17,12 @@
   import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
   import { Toaster } from "$lib/components/ui/sonner/index.js"
   import { toast } from "svelte-sonner";
-
+  import * as Popover from "$lib/components/ui/popover/index.js";
+  
 
   let currentPage = 'home';
+  let filterGenre = '';
+  let filterLanguage = '';
 
   let popularSongs = [
     {
@@ -28,13 +31,13 @@
       artist: 'Ado',
     },
     {
-      icon: 'https://i.scdn.co/image/ab67616d0000b273283a117f2bc39bc4122692c0',
-      name: 'Shoka',
-      artist: 'Ado',
+      icon: 'https://i.scdn.co/image/ab67616d0000b273b7982c8970577920c74d601e',
+      name: 'NOX LUX',
+      artist: 'MYTH & ROID',
     },
     {
-      icon: 'https://i.scdn.co/image/ab67616d0000b273283a117f2bc39bc4122692c0',
-      name: 'Shoka',
+      icon: 'https://i.scdn.co/image/ab67616d0000b273e204aafb5c393179c77c5253',
+      name: 'Show',
       artist: 'Ado',
     },
   ];
@@ -82,6 +85,28 @@
     "https://open.spotify.com/embed/track/4lriIG2vNqwDWzOj2I9rtj?utm_source=generator&theme=0"
   ];
 
+  let randomSongs = {
+    'Rock': {
+      'English': 'https://open.spotify.com/embed/track/24l3mfIPWVa645a9LEwSHx?utm_source=generator&theme=0',
+      'Japanese': 'https://open.spotify.com/embed/track/6xXbvCVJJvDASAmKGE3IXh?utm_source=generator&theme=0'
+    },
+    'Pop': {
+      'English': 'https://open.spotify.com/embed/track/2aL4lMGhWdPpyPL6COPou7?utm_source=generator&theme=0',
+      'Japanese': 'https://open.spotify.com/embed/track/3lsd1CbDC5ejAOJhPn5dB9?utm_source=generator&theme=0'
+    },
+  }
+
+  let randomArtists = {
+    'Rock': {
+      'English': 'https://open.spotify.com/embed/artist/3N8Hy6xQnQv1F1XCiyGQqA?utm_source=generator&theme=0',
+      'Japanese': 'https://open.spotify.com/embed/artist/630wzNP2OL7fl4Xl0GnMWq?utm_source=generator&theme=0'
+    },
+    'Pop': {
+      'English': 'https://open.spotify.com/embed/artist/06HL4z0CvFAxyc27GXpf02?utm_source=generator&theme=0',
+      'Japanese': 'https://open.spotify.com/embed/artist/6bDWAcdtVR3WHz2xtiIPUi?utm_source=generator&theme=0'
+    },
+  }
+
 </script>
 
 <style>
@@ -92,13 +117,6 @@
   font-style: normal;
 }
 
-  #main {
-    background:linear-gradient(120deg, #1db954, #191414);
-  }
-
-  #random {
-    background:linear-gradient(60deg, #1db954, #191414);
-  }
 
   main {
     background:linear-gradient(60deg, #1db954, #191414);
@@ -147,6 +165,42 @@
         <p class="text-white text-lg ml-[-11.5%]">Discover a random: </p>
         <Button variant="hero" class="w-28" on:click={() => currentPage = 'song'}>Song</Button>
         <Button variant="hero" class="w-28" on:click={() => currentPage = 'song'}>Artist</Button>
+
+        <Popover.Root>
+          <Popover.Trigger class={buttonVariants({variant: "secondary"})}>Filters</Popover.Trigger>
+          <Popover.Content class="w-80">
+            <div class="grid gap-4">
+              <div class="space-y-2">
+                <h4 class="font-medium leading-none">Filters</h4>
+                <p class="text-muted-foreground text-sm">
+                  Specify the genre and language of today's random song and artist.
+                </p>
+              </div>
+              <div class="grid gap-2">
+                <div class="grid grid-cols-3 items-center gap-4">
+                  <Label for="genre">Genre</Label>
+                  <Select.Root type="single" id="genre" bind:value={filterGenre}>
+                    <Select.Trigger class="w-[180px]">{filterGenre == '' ? 'Select a genre' : filterGenre}</Select.Trigger>
+                    <Select.Content>
+                      <Select.Item value="Rock">Rock</Select.Item>
+                      <Select.Item value="Pop">Pop</Select.Item>
+                    </Select.Content>
+                  </Select.Root>
+                </div>
+                <div class="grid grid-cols-3 items-center gap-4">
+                  <Label for="language">Language</Label>
+                  <Select.Root type="single" id="language" bind:value={filterLanguage}>
+                    <Select.Trigger class="w-[180px]">{filterLanguage == '' ? 'Select a language' : filterLanguage}</Select.Trigger>
+                    <Select.Content>
+                      <Select.Item value="English">English</Select.Item>
+                      <Select.Item value="Japanese">Japanese</Select.Item>
+                    </Select.Content>
+                  </Select.Root>
+                </div>
+              </div>
+            </div>
+          </Popover.Content>
+        </Popover.Root>
       </div>
 
       <div class="flex justify-center text-white mt-8">
@@ -161,7 +215,7 @@
           <Accordion.Item value="item-2">
             <Accordion.Trigger>How often can I see new selections?</Accordion.Trigger>
             <Accordion.Content>
-              Everyday there will be a new random song and artist of the day for you to view! But by customizing
+              Every day there will be a new random song and artist of the day for you to view! But by customizing
               your filters, you can potentially see multiple songs and artists per day.
             </Accordion.Content>
           </Accordion.Item>
@@ -220,9 +274,9 @@
             <Card.Content>
               <div id="selection">
                 {#if currentPage == 'song'}
-                  <iframe title="Spotify embed of random selection" style="border-radius:12px" src="https://open.spotify.com/embed/track/3lsd1CbDC5ejAOJhPn5dB9?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                  <iframe title="Spotify embed of random selection" style="border-radius:12px" src={filterGenre != '' && filterLanguage != '' ? randomSongs[filterGenre][filterLanguage] : randomSongs['Pop']['Japanese'] } width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                 {:else}
-                  <iframe title="Spotify embed of random artist" style="border-radius:12px" src="https://open.spotify.com/embed/artist/6bDWAcdtVR3WHz2xtiIPUi?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                  <iframe title="Spotify embed of random artist" style="border-radius:12px" src={filterGenre != '' && filterLanguage != '' ? randomArtists[filterGenre][filterLanguage] : randomArtists['Pop']['Japanese']} width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                 {/if}
               </div>
             </Card.Content>
@@ -371,8 +425,11 @@
 
               <ScrollArea class="h-[28rem] w-full">
                 {#each savedItems as item, i}
-                  <div id="selection" class="mb-4" >
-                    <iframe title="Spotify embed of random selection" style="border-radius:12px" src={item} width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                  <div id="selection" class="mb-4 flex gap-4" >
+                    <Button variant="ghost" class="mt-2 h-2 text-white rounded-full px-1" on:click={() => {
+                      savedItems.splice(i,1);
+                      savedItems = [...savedItems];
+                    }}>X</Button><iframe title="Spotify embed of random selection" style="border-radius:12px" src={item} width="90%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                   </div>
                 {/each}
               </ScrollArea>
