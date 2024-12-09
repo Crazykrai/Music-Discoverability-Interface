@@ -164,7 +164,7 @@
       <div class="flex items-center justify-center gap-4">
         <p class="text-white text-lg ml-[-11.5%]">Discover a random: </p>
         <Button variant="hero" class="w-28" on:click={() => currentPage = 'song'}>Song</Button>
-        <Button variant="hero" class="w-28" on:click={() => currentPage = 'song'}>Artist</Button>
+        <Button variant="hero" class="w-28" on:click={() => currentPage = 'artist'}>Artist</Button>
 
         <Popover.Root>
           <Popover.Trigger class={buttonVariants({variant: "secondary"})}>Filters</Popover.Trigger>
