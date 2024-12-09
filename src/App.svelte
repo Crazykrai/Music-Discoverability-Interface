@@ -263,9 +263,9 @@
                 {/if}
                 <Button variant="secondary" class="w-20" on:click={() => {
                   if(currentPage == 'song') {
-                    savedItems = [...savedItems, "https://open.spotify.com/embed/track/3lsd1CbDC5ejAOJhPn5dB9?utm_source=generator&theme=0"];
+                    savedItems = [...savedItems, filterGenre != '' && filterLanguage != '' ? randomSongs[filterGenre][filterLanguage] : randomSongs['Pop']['Japanese'] ];
                   } else {
-                    savedItems = [...savedItems, "https://open.spotify.com/embed/artist/6bDWAcdtVR3WHz2xtiIPUi?utm_source=generator&theme=0"]
+                    savedItems = [...savedItems, filterGenre != '' && filterLanguage != '' ? randomArtists[filterGenre][filterLanguage] : randomArtists['Pop']['Japanese']]
                   }
                   toast.success("Added to your saved items.")
                 }}>Save</Button>
